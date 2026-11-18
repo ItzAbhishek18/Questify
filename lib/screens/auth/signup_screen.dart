@@ -4,7 +4,12 @@ import '../../services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({super.key});
+  final AuthService authService;
+
+  const SignUpScreen({
+    super.key,
+    required this.authService,
+  });
 
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
@@ -17,8 +22,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-
-  final AuthService _authService = AuthService();
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -43,18 +46,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
     });
 
     try {
-      final userCredential = await _authService.signUp(
+      final userCredential = await widget.authService.signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
 
       // Save user's name in Firebase Authentication profile.
-      await userCredential.user?.updateDisplayName(
-        _nameController.text.trim(),
-      );
-
-      // Refresh the user profile.
-      await userCredential.user?.reload();
+      try {
+        await userCredential.user?.updateDisplayName(
+          _nameController.text.trim(),
+        );
+        await userCredential.user?.reload();
+      } catch (_) {
+        // Account was created; non-fatal profile update failure.
+      }
 
       if (!mounted) return;
 

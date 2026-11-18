@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
+import '../../services/auth_service.dart';
 import 'login_screen.dart';
+import 'signup_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
-  const WelcomeScreen({super.key});
+  final AuthService authService;
 
-  void _openAuthPlaceholder(BuildContext context, String title) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => AuthPlaceholderScreen(title: title),
-      ),
-    );
-  }
+  const WelcomeScreen({
+    super.key,
+    required this.authService,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +68,12 @@ class WelcomeScreen extends StatelessWidget {
               // Get Started button
               ElevatedButton(
                 onPressed: () {
-                  _openAuthPlaceholder(context, 'Create Account');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => SignUpScreen(authService: authService),
+                    ),
+                  );
                 },
                 child: const Text(
                   'GET STARTED',
@@ -89,7 +92,7 @@ class WelcomeScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const LoginScreen(),
+                      builder: (_) => LoginScreen(authService: authService),
                     ),
                   );
                 },
@@ -126,36 +129,6 @@ class WelcomeScreen extends StatelessWidget {
               const SizedBox(height: 20),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-// Temporary screen until Login and Registration are implemented.
-class AuthPlaceholderScreen extends StatelessWidget {
-  final String title;
-
-  const AuthPlaceholderScreen({
-    super.key,
-    required this.title,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.cream,
-      appBar: AppBar(
-        title: Text(title),
-      ),
-      body: Center(
-        child: Text(
-          '$title screen will be implemented next.',
-          style: const TextStyle(
-            color: AppTheme.forestGreen,
-            fontSize: 18,
-          ),
-          textAlign: TextAlign.center,
         ),
       ),
     );

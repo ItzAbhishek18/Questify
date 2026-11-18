@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/theme/app_theme.dart';
+import '../../services/auth_service.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final AuthService authService;
+
+  const LoginScreen({
+    super.key,
+    required this.authService,
+  });
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -16,6 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
 
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -24,15 +32,66 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _login() {
-    if (_formKey.currentState!.validate()) {
+  Future<void> _login() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await widget.authService.signIn(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+
+      if (!mounted) return;
+      Navigator.pop(context);
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+
+      String message;
+
+      switch (e.code) {
+        case 'user-not-found':
+          message = 'No user found for that email.';
+          break;
+        case 'wrong-password':
+          message = 'Wrong password provided.';
+          break;
+        case 'invalid-email':
+          message = 'Please enter a valid email address.';
+          break;
+        case 'user-disabled':
+          message = 'This account has been disabled.';
+          break;
+        default:
+          message = e.message ?? 'Login failed. Please try again.';
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Login UI is working! Firebase will be connected next.',
-          ),
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red.shade700,
         ),
       );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Something went wrong: $e'),
+          backgroundColor: Colors.red.shade700,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -111,6 +170,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
+                    enabled: !_isLoading,
                     decoration: const InputDecoration(
                       hintText: 'Enter your email',
                       prefixIcon: Icon(Icons.email_outlined),
@@ -147,6 +207,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextFormField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
+                    enabled: !_isLoading,
                     decoration: InputDecoration(
                       hintText: 'Enter your password',
                       prefixIcon: const Icon(Icons.lock_outline),
@@ -182,7 +243,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: () {
+                      onPressed: _isLoading
+                          ? null
+                          : () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text(
@@ -205,8 +268,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   // Login button
                   ElevatedButton(
-                    onPressed: _login,
-                    child: const Text(
+                    onPressed: _isLoading ? null : _login,
+                    child: _isLoading
+                        ? const SizedBox(
+                      height: 22,
+                      width: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Colors.white,
+                      ),
+                    )
+                        : const Text(
                       'LOG IN',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
@@ -242,7 +314,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   // Google sign-in button
                   OutlinedButton.icon(
-                    onPressed: () {
+                    onPressed: _isLoading
+                        ? null
+                        : () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(
@@ -284,11 +358,15 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: () {
+                        onTap: _isLoading
+                            ? null
+                            : () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const SignUpScreen(),
+                              builder: (_) => SignUpScreen(
+                                authService: widget.authService,
+                              ),
                             ),
                           );
                         },
