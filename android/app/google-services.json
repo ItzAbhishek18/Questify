@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "1060658165630",
+    "project_id": "questify-44b77",
+    "storage_bucket": "questify-44b77.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1060658165630:android:9049421113259c7d41652f",
+        "android_client_info": {
+          "package_name": "com.example.questify"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1060658165630-9avr83uubj2o7sk26edu05c5u99vo289.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKyF7Mc_QJ7tMklwIdCKgetVGpoYepTL0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1060658165630-9avr83uubj2o7sk26edu05c5u99vo289.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1060658165630-n7b2k9uuqoc5hfbks4ld3g658ubtiufn.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.questify"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
